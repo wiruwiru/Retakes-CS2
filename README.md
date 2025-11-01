@@ -106,6 +106,7 @@ When the plugin is first loaded it will create a `retakes_config.json` file in t
 | !forcebombsite     | <A / B>                           | Force the retakes to occur from a single bombsite.                   | @css/root   |
 | !forcebombsitestop |                                   | Clear the forced bombsite and return back to normal.                 | @css/root   |
 | !scramble          |                                   | Scrambles the teams next round.                                      | @css/admin  |
+| !scrambleteams     |                                   | Scrambles the teams next round (alias).                              | @css/admin  |
 | !voices            |                                   | Toggles whether or not to hear the bombsite voice announcements.     |             |
 | css_debugqueues    |                                   | **SERVER ONLY** Shows the current queue state in the server console. |             |
 
@@ -113,25 +114,47 @@ When the plugin is first loaded it will create a `retakes_config.json` file in t
 | Command            | Arguments                         | Description                                                          | Permissions |
 |--------------------|-----------------------------------|----------------------------------------------------------------------|-------------|
 | !showspawns        | <A / B>                           | Show the spawns for the specified bombsite.                          | @css/root   |
+| !spawns            | <A / B>                           | Show the spawns for the specified bombsite (alias).                  | @css/root   |
+| !edit              | <A / B>                           | Show the spawns for the specified bombsite (alias).                  | @css/root   |
 | !addspawn          | <CT / T> <Y / N (can be planter)> | Adds a retakes spawn point for the bombsite spawns currently shown.  | @css/root   |
+| !add               | <CT / T> <Y / N (can be planter)> | Adds a retakes spawn point (alias).                                  | @css/root   |
+| !newspawn          | <CT / T> <Y / N (can be planter)> | Adds a retakes spawn point (alias).                                  | @css/root   |
+| !new               | <CT / T> <Y / N (can be planter)> | Adds a retakes spawn point (alias).                                  | @css/root   |
 | !removespawn       |                                   | Removes the nearest spawn point for the bombsite currently shown.    | @css/root   |
+| !remove            |                                   | Removes the nearest spawn point (alias).                             | @css/root   |
+| !deletespawn       |                                   | Removes the nearest spawn point (alias).                             | @css/root   |
+| !delete            |                                   | Removes the nearest spawn point (alias).                             | @css/root   |
 | !nearestspawn      |                                   | Teleports the player to the nearest spawn.                           | @css/root   |
+| !nearest           |                                   | Teleports the player to the nearest spawn (alias).                   | @css/root   |
 | !hidespawns        |                                   | Exits the spawn editing mode.                                        | @css/root   |
+| !done              |                                   | Exits the spawn editing mode (alias).                                | @css/root   |
+| !exitedit          |                                   | Exits the spawn editing mode (alias).                                | @css/root   |
 
 ### Barrier Editor Commands
 | Command            | Arguments    | Description                                                                    | Permissions |
 |--------------------|--------------|--------------------------------------------------------------------------------|-------------|
 | !editbarriers      | <A / B>      | Enter barrier editing mode for a bombsite. Game pauses until editing is done. | @css/root   |
-| !addbarrier        |              | Use ping (X key) twice to mark two corners of a barrier.                      | @css/root   |
+| !barriers          | <A / B>      | Enter barrier editing mode for a bombsite (alias).                            | @css/root   |
+| !showbarriers      | <A / B>      | Show barriers for a bombsite without editing mode.                            | @css/root   |
+| !viewbarriers      | <A / B>      | Show barriers for a bombsite without editing mode (alias).                    | @css/root   |
+| !hidebarriers      |              | Exit barrier viewing mode.                                                     | @css/root   |
 | !removebarrier     |              | Remove the nearest barrier to your position.                                   | @css/root   |
+| !deletebarrier     |              | Remove the nearest barrier to your position (alias).                           | @css/root   |
 | !testbarrier       |              | Spawn the barriers for the current bombsite to test their placement.          | @css/root   |
 | !donebarriers      |              | Exit barrier editing mode and restart the map.                                 | @css/root   |
+| !exitbarriers      |              | Exit barrier editing mode and restart the map (alias).                         | @css/root   |
+
+**Note:** When in barrier editing mode, use the ping key (default: X) twice to mark two corners of a barrier.
 
 ### Map Config Commands
 | Command            | Arguments          | Description                                    | Permissions |
 |--------------------|--------------------|------------------------------------------------|-------------|
 | !mapconfig         | <Config file name> | Forces a specific map config file to load.     | @css/root   |
+| !setmapconfig      | <Config file name> | Forces a specific map config file to load (alias). | @css/root   |
+| !loadmapconfig     | <Config file name> | Forces a specific map config file to load (alias). | @css/root   |
 | !mapconfigs        |                    | Displays a list of available map configs.     | @css/root   |
+| !viewmapconfigs    |                    | Displays a list of available map configs (alias). | @css/root   |
+| !listmapconfigs    |                    | Displays a list of available map configs (alias). | @css/root   |
 
 ## Stay up to date
 Subscribe to **release** notifications and stay up to date with the latest features and patches:

@@ -18,6 +18,7 @@ public class BarrierEditorCommands
     private readonly BarrierConfigService _barrierConfigService;
     private readonly BarrierManager _barrierManager;
     private Bombsite? _editingBombsite;
+    private Bombsite? _showingBarriersForBombsite;
     private Vector? _firstPoint;
     private bool _isEditingMode;
 
@@ -30,6 +31,77 @@ public class BarrierEditorCommands
     }
 
     public bool IsEditingMode => _isEditingMode;
+    public Bombsite? ShowingBarriersForBombsite => _showingBarriersForBombsite;
+
+    public void OnCommandShowBarriers(CCSPlayerController? player, CommandInfo commandInfo)
+    {
+        if (!PlayerHelper.IsValid(player))
+        {
+            return;
+        }
+
+        if (!AdminManager.PlayerHasPermissions(player, "@css/root"))
+        {
+            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.no_permissions"]}");
+            return;
+        }
+
+        if (commandInfo.ArgCount < 2)
+        {
+            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Usage: !showbarriers [A/B]");
+            return;
+        }
+
+        var bombsite = commandInfo.GetArg(1).ToUpper();
+        if (bombsite != "A" && bombsite != "B")
+        {
+            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} You must specify a bombsite [A / B].");
+            return;
+        }
+
+        _showingBarriersForBombsite = bombsite == "A" ? Bombsite.A : Bombsite.B;
+
+        Server.ExecuteCommand("mp_warmup_pausetimer 1");
+        Server.ExecuteCommand("mp_warmuptime 999999");
+        Server.ExecuteCommand("mp_warmup_start");
+
+        _plugin.AddTimer(1.0f, () =>
+        {
+            if (_showingBarriersForBombsite != null)
+            {
+                _barrierManager.SpawnBarrier((Bombsite)_showingBarriersForBombsite);
+                Logger.LogInfo("Commands", $"Barriers displayed for bombsite {_showingBarriersForBombsite}");
+            }
+        });
+
+        commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Showing barriers for bombsite {_showingBarriersForBombsite}.");
+        commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Use !hidebarriers to exit.");
+
+        Logger.LogInfo("Commands", $"{player!.PlayerName} is viewing barriers for bombsite {_showingBarriersForBombsite}");
+    }
+
+    public void OnCommandHideBarriers(CCSPlayerController? player, CommandInfo commandInfo)
+    {
+        if (!PlayerHelper.IsValid(player))
+        {
+            return;
+        }
+
+        if (!AdminManager.PlayerHasPermissions(player, "@css/root"))
+        {
+            commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} {_plugin.Localizer["retakes.no_permissions"]}");
+            return;
+        }
+
+        _showingBarriersForBombsite = null;
+        _barrierManager.RemoveBarrier();
+
+        Server.ExecuteCommand("mp_warmup_pausetimer 0");
+        Server.ExecuteCommand("mp_warmup_end");
+
+        commandInfo.ReplyToCommand($"{_plugin.Localizer["retakes.prefix"]} Exited barrier viewing mode.");
+        Logger.LogInfo("Commands", $"{player!.PlayerName} exited barrier viewing mode");
+    }
 
     public void OnCommandEditBarriers(CCSPlayerController? player, CommandInfo commandInfo)
     {

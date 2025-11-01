@@ -195,7 +195,8 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
                 Config.MapConfig.EnableFallbackBombsiteAnnouncement,
                 Config.Barrier.IsBarrierEnabled,
                 Config.Barrier.BarrierRemoveDelay,
-                _random
+                _random,
+                _mapConfigService
             );
 
             _playerEventHandlers = new PlayerEventHandlers(_gameManager, _hasMutedVoices);
@@ -273,6 +274,9 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
         {
             AddCommand("css_editbarriers", "Enter barrier editing mode for a bombsite.", _barrierEditorCommands.OnCommandEditBarriers);
             AddCommand("css_barriers", "Enter barrier editing mode for a bombsite.", _barrierEditorCommands.OnCommandEditBarriers);
+            AddCommand("css_showbarriers", "Show barriers for a bombsite.", _barrierEditorCommands.OnCommandShowBarriers);
+            AddCommand("css_viewbarriers", "Show barriers for a bombsite.", _barrierEditorCommands.OnCommandShowBarriers);
+            AddCommand("css_hidebarriers", "Exit barrier viewing mode.", _barrierEditorCommands.OnCommandHideBarriers);
             AddCommand("css_removebarrier", "Remove the nearest barrier.", _barrierEditorCommands.OnCommandRemoveBarrier);
             AddCommand("css_deletebarrier", "Remove the nearest barrier.", _barrierEditorCommands.OnCommandRemoveBarrier);
             AddCommand("css_testbarrier", "Test current barriers for the bombsite.", _barrierEditorCommands.OnCommandTestBarrier);
