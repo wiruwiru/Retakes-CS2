@@ -17,11 +17,14 @@ public class RoundEventHandlers
     private readonly GameManager _gameManager;
     private readonly SpawnManager _spawnManager;
     private readonly BreakerManager? _breakerManager;
+    private readonly BarrierManager? _barrierManager;
     private readonly AllocationService _allocationService;
     private readonly AnnouncementService _announcementService;
     private readonly bool _isAutoPlantEnabled;
     private readonly bool _enableFallbackAllocation;
     private readonly bool _enableFallbackBombsiteAnnouncement;
+    private readonly bool _isBarrierEnabled;
+    private readonly float _barrierRemoveDelay;
     private readonly Random _random;
 
     private Bombsite _currentBombsite = Bombsite.A;
@@ -29,16 +32,19 @@ public class RoundEventHandlers
     private CsTeam _lastRoundWinner = CsTeam.None;
     private Bombsite? _forcedBombsite;
 
-    public RoundEventHandlers(GameManager gameManager, SpawnManager spawnManager, BreakerManager? breakerManager, AllocationService allocationService, AnnouncementService announcementService, bool isAutoPlantEnabled, bool enableFallbackAllocation, bool enableFallbackBombsiteAnnouncement, Random random)
+    public RoundEventHandlers(GameManager gameManager, SpawnManager spawnManager, BreakerManager? breakerManager, BarrierManager? barrierManager, AllocationService allocationService, AnnouncementService announcementService, bool isAutoPlantEnabled, bool enableFallbackAllocation, bool enableFallbackBombsiteAnnouncement, bool isBarrierEnabled, float barrierRemoveDelay, Random random)
     {
         _gameManager = gameManager;
         _spawnManager = spawnManager;
         _breakerManager = breakerManager;
+        _barrierManager = barrierManager;
         _allocationService = allocationService;
         _announcementService = announcementService;
         _isAutoPlantEnabled = isAutoPlantEnabled;
         _enableFallbackAllocation = enableFallbackAllocation;
         _enableFallbackBombsiteAnnouncement = enableFallbackBombsiteAnnouncement;
+        _isBarrierEnabled = isBarrierEnabled;
+        _barrierRemoveDelay = barrierRemoveDelay;
         _random = random;
     }
 
@@ -88,6 +94,12 @@ public class RoundEventHandlers
         _breakerManager?.Handle();
         _currentBombsite = _forcedBombsite ?? (_random.Next(0, 2) == 0 ? Bombsite.A : Bombsite.B);
         _gameManager.ResetPlayerScores();
+
+        if (_isBarrierEnabled && _barrierManager != null)
+        {
+            _barrierManager.SpawnBarrier(_currentBombsite);
+            Logger.LogInfo("Round", $"Barriers spawned for bombsite {_currentBombsite}");
+        }
 
         _planter = _spawnManager.HandleRoundSpawns(_currentBombsite, _gameManager.QueueManager.ActivePlayers);
 
@@ -145,6 +157,18 @@ public class RoundEventHandlers
             return HookResult.Continue;
         }
 
+        if (_isBarrierEnabled && _barrierManager != null)
+        {
+            Server.NextFrame(() =>
+            {
+                var timer = new CounterStrikeSharp.API.Modules.Timers.Timer(_barrierRemoveDelay, () =>
+                {
+                    _barrierManager.RemoveBarrier();
+                    Logger.LogInfo("Round", "Barriers removed after freeze time");
+                });
+            });
+        }
+
         if (PlayerHelper.GetPlayerCount(CsTeam.Terrorist) > 0)
         {
             HandleAutoPlant();
@@ -156,6 +180,13 @@ public class RoundEventHandlers
     public HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
     {
         _lastRoundWinner = (CsTeam)@event.Winner;
+
+        if (_isBarrierEnabled && _barrierManager != null)
+        {
+            _barrierManager.RemoveBarrier();
+            Logger.LogDebug("Round", "Barriers cleaned up at round end");
+        }
+
         Logger.LogInfo("Round", $"Round ended. Winner: {_lastRoundWinner}");
         return HookResult.Continue;
     }

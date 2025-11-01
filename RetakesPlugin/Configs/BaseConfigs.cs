@@ -17,6 +17,9 @@ public class BaseConfigs : BasePluginConfig
     [JsonPropertyName("MapConfigSettings")]
     public MapConfigSettings MapConfig { get; set; } = new();
 
+    [JsonPropertyName("BarrierSettings")]
+    public BarrierSettings Barrier { get; set; } = new();
+
     [JsonPropertyName("BombSettings")]
     public BombSettings Bomb { get; set; } = new();
 
