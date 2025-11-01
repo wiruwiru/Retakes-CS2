@@ -31,8 +31,13 @@ If you appreciate the project then please take the time to star the repository ð
 - [x] Barrier system (temporary walls that block paths at round start)
 
 ## Installation
-- Download the zip file from the [latest release](https://github.com/B3none/cs2-retakes/releases/latest), and extract the contents into your `addons/counterstrikesharp/plugins` directory.
-- Download the latest shared plugin and put it into your `addons/counterstrikesharp/shared` directory.
+1. Install [CounterStrike Sharp](https://github.com/roflmuffin/CounterStrikeSharp) and [Metamod:Source](https://www.sourcemm.net/downloads.php/?branch=master)
+2. Download the plugin from the [releases section](https://github.com/B3none/cs2-retakes/releases/latest):
+   - **RetakesPlugin-[version].zip** - Includes pre-configured map spawns (recommended for new installations)
+   - **RetakesPlugin-[version]-no-map-configs.zip** - Without map configurations (for custom setups)
+3. Unzip the archive and upload it to the game server into your `addons/counterstrikesharp/` directory.
+4. Start the server and wait for the config.json file to be generated in `addons/counterstrikesharp/configs/plugins/RetakesPlugin`.
+5. Complete the configuration file with the parameters of your choice.
 
 ## Recommendations
 I also recommend installing these plugins for an improved player experience
