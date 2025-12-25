@@ -7,6 +7,9 @@ public class GameSettings
     [JsonPropertyName("MaxPlayers")]
     public int MaxPlayers { get; set; } = 9;
 
+    [JsonPropertyName("AutoAddToQueue")]
+    public bool AutoAddToQueue { get; set; } = true;
+
     [JsonPropertyName("ShouldBreakBreakables")]
     public bool ShouldBreakBreakables { get; set; } = false;
 

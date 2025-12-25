@@ -34,13 +34,57 @@ public class PlayerEventHandlers
         // Add small delay to ensure player is fully connected
         _plugin.AddTimer(1.0f, () =>
         {
-            if (!PlayerHelper.IsValid(player))
+            if (!PlayerHelper.IsValid(player) || _gameManager == null)
             {
                 return;
             }
 
-            player.ChangeTeam(CsTeam.Spectator);
-            player.ExecuteClientCommand("teammenu");
+            // Check if player is already in queue system
+            var isInQueue = _gameManager.QueueManager.QueuePlayers.Contains(player);
+            var isInActivePlayers = _gameManager.QueueManager.ActivePlayers.Contains(player);
+
+            if (!isInQueue && !isInActivePlayers)
+            {
+                var willBeFirstPlayer = _gameManager.QueueManager.ActivePlayers.Count == 0 && _gameManager.QueueManager.QueuePlayers.Count == 0;
+                if (willBeFirstPlayer)
+                {
+                    // First player: assign directly to default team (Terrorist)
+                    Logger.LogDebug("Player", $"[{player.PlayerName}] First player - assigning directly to team");
+
+                    _gameManager.QueueManager.ClearRoundTeams();
+                    _gameManager.QueueManager.DebugQueues(true);
+
+                    // Add player directly to active players
+                    _gameManager.QueueManager.PlayerJoinedTeam(player, CsTeam.None, CsTeam.Terrorist);
+                    player.ChangeTeam(CsTeam.Terrorist);
+
+                    _gameManager.QueueManager.Update();
+                    _gameManager.QueueManager.DebugQueues(false);
+
+                    Logger.LogDebug("Player", $"[{player.PlayerName}] First player added. ActivePlayers count: {_gameManager.QueueManager.ActivePlayers.Count}");
+                    GameRulesHelper.RestartGame();
+                }
+                else
+                {
+                    if (_plugin.Config.Game.AutoAddToQueue)
+                    {
+                        // Not first player: Send to spectator and add to queue
+                        player.ChangeTeam(CsTeam.Spectator);
+
+                        Logger.LogDebug("Player", $"[{player.PlayerName}] Adding new player to queue via OnPlayerConnectFull");
+
+                        _gameManager.QueueManager.ClearRoundTeams();
+
+                        // Add player to queue system
+                        _gameManager.QueueManager.DebugQueues(true);
+                        _gameManager.QueueManager.QueuePlayers.Add(player);
+                        _gameManager.QueueManager.DebugQueues(false);
+
+                        Logger.LogDebug("Player", $"[{player.PlayerName}] Player added to queue. ActivePlayers count: {_gameManager.QueueManager.ActivePlayers.Count}");
+                    }
+                }
+            }
+
         });
 
         // Grant VIP to contributors
