@@ -58,6 +58,7 @@ When the plugin is first loaded it will create a `retakes_config.json` file in t
 | Config                    | Description                                                                                                                             | Default | Min   | Max   |
 |---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------|-------|-------|
 | MaxPlayers                | The maximum number of players allowed in the game at any time. (If you want to increase the max capability you need to add more spawns) | 9       | 2     | 10    |
+| AutoAddToQueue            | Whether to automatically add new players to the queue when they connect. If disabled, players will need to manually join the game.        | true    | false | true  |
 | ShouldBreakBreakables     | Whether to break all breakable props on round start (People are noticing rare crashes when this is enabled).                            | false   | false | true  |
 | ShouldOpenDoors           | Whether to open doors on round start (People are noticing rare crashes when this is enabled).                                           | false   | false | true  |
 | EnableFallbackAllocation  | Whether to enable the fallback weapon allocation. You should set this value to false if you're using a standalone weapon allocator.     | true    | false | true  |
