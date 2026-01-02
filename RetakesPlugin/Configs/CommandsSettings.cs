@@ -9,8 +9,8 @@ public class CommandsSettings
     {
         { "css_forcebombsite", "@css/root" },
         { "css_forcebombsitestop", "@css/root" },
-        { "css_scramble", "@css/admin" },
-        { "css_scrambleteams", "@css/admin" },
+        { "css_scramble", "@css/generic" },
+        { "css_scrambleteams", "@css/generic" },
         { "css_debugqueues", "@css/root" }
     };
 
