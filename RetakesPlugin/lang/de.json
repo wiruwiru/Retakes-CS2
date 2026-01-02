@@ -1,6 +1,7 @@
 {
   "retakes.prefix": "[{green}RETAKES{default}]",
   "retakes.no_permissions": "Du hast keine Berechtigung, diesen Befehl zu verwenden.",
+  "retakes.cannot_switch_teams": "Du kannst nicht zwischen Terroristen und Counter-Terroristen während der Runde wechseln.",
   "retakes.enabled": "{red}deaktiviert{default}",
   "retakes.disabled": "{green}aktiviert{default}",
 

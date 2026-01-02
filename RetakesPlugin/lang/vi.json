@@ -1,6 +1,7 @@
 ﻿{
   "retakes.prefix": "[{green}RETAKES{default}]",
   "retakes.no_permissions": "Bạn không có quyền sử dụng lệnh này.",
+  "retakes.cannot_switch_teams": "Bạn không thể chuyển đổi đội trong khi trận đấu đang diễn ra.",
   "retakes.enabled": "{red}đã tắt{default}",
   "retakes.disabled": "{green}đã bật{default}",
 

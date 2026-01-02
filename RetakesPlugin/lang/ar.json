@@ -1,6 +1,7 @@
 {
   "retakes.prefix": "[{green}RETAKES{default}]",
   "retakes.no_permissions": "ليس لديك الإذن لاستخدام هذا الأمر.",
+  "retakes.cannot_switch_teams": "لا يمكنك تغيير الفريق أثناء الجولة.",
   "retakes.enabled": "{red}معطل{default}",
   "retakes.disabled": "{green}مفعل{default}",
 

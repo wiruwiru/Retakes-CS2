@@ -1,6 +1,7 @@
 ﻿{
   "retakes.prefix": "[{green}RETAKES{default}]",
   "retakes.no_permissions": "您沒有使用此指令的權限。",
+  "retakes.cannot_switch_teams": "您不能在遊戲過程中切換隊伍。",
   "retakes.enabled": "{red}已停用{default}",
   "retakes.disabled": "{green}已啟用{default}",
 

@@ -1,6 +1,7 @@
 {
   "retakes.prefix": "[{green}RETAKES{default}]",
   "retakes.no_permissions": "Du har ikke tillatelse til å bruke denne kommandoen.",
+  "retakes.cannot_switch_teams": "Du kan ikke skifte hold under runden.",
   "retakes.enabled": "{red}deaktivert{default}",
   "retakes.disabled": "{green}aktivert{default}",
 

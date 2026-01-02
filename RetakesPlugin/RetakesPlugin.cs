@@ -1,5 +1,6 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Utils;
 using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Core.Capabilities;
 using CounterStrikeSharp.API.Modules.Commands;
@@ -362,14 +363,28 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
             return HookResult.Continue;
         }
 
-        if (!PlayerHelper.IsValid(player) || commandInfo.ArgCount < 2 ||
-            !Enum.TryParse<CounterStrikeSharp.API.Modules.Utils.CsTeam>(commandInfo.GetArg(1), out var toTeam))
+        if (!PlayerHelper.IsValid(player) || commandInfo.ArgCount < 2 || !Enum.TryParse<CsTeam>(commandInfo.GetArg(1), out var toTeam))
         {
             return HookResult.Handled;
         }
 
         var fromTeam = player!.Team;
         Utils.Logger.LogDebug("Commands", $"[{player.PlayerName}] {fromTeam} -> {toTeam}");
+
+        if (_gameManager.QueueManager.ActivePlayers.Contains(player))
+        {
+            var gameRules = GameRulesHelper.GetGameRulesOrNull();
+            var isInWarmup = gameRules?.WarmupPeriod ?? false;
+            if (!isInWarmup && Config.Team.ShouldPreventTeamChangesMidRound)
+            {
+                if ((fromTeam == CsTeam.Terrorist && toTeam == CsTeam.CounterTerrorist) || (fromTeam == CsTeam.CounterTerrorist && toTeam == CsTeam.Terrorist))
+                {
+                    player.PrintToChat($"{Localizer["retakes.prefix"]} {Localizer["retakes.cannot_switch_teams"]}");
+                    Utils.Logger.LogInfo("Commands", $"[{player.PlayerName}] Blocked team switch from {fromTeam} to {toTeam} during round");
+                    return HookResult.Handled;
+                }
+            }
+        }
 
         _gameManager.QueueManager.DebugQueues(true);
         var response = _gameManager.QueueManager.PlayerJoinedTeam(player, fromTeam, toTeam);

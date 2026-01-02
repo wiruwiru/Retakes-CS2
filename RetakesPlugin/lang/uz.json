@@ -1,6 +1,7 @@
 {
   "retakes.prefix": "[{green}RETAKES{default}]",
   "retakes.no_permissions": "Sizda bu buyruqdan foydalanish huquqi yo'q.",
+  "retakes.cannot_switch_teams": "O‘yin davrida jamoani o‘zgartirish mumkin emas.",
   "retakes.enabled": "{red}o'chirilgan{default}",
   "retakes.disabled": "{green}yoqilgan{default}",
   

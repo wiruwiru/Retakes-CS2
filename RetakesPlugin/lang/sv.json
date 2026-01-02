@@ -1,6 +1,7 @@
 {
   "retakes.prefix": "[{green}RETAKES{default}]",
   "retakes.no_permissions": "Du har inte behörighet att använda detta kommando.",
+  "retakes.cannot_switch_teams": "Du kan inte byta lag under rundan.",
   "retakes.enabled": "{red}inaktiverad{default}",
   "retakes.disabled": "{green}aktiverad{default}",
 

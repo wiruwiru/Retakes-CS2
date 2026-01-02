@@ -1,6 +1,7 @@
 {
   "retakes.prefix": "[{green}RETAKES{default}]",
   "retakes.no_permissions": "Não tens permissão para usar este comando.",
+  "retakes.cannot_switch_teams": "Não pode mudar de time durante a rodada.",
   "retakes.enabled": "{red}desativado{default}",
   "retakes.disabled": "{green}ativado{default}",
   

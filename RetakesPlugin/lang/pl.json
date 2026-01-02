@@ -1,6 +1,7 @@
 {
   "retakes.prefix": "[{green}RETAKES{default}]",
   "retakes.no_permissions": "Nie masz uprawnień do użycia tej komendy.",
+  "retakes.cannot_switch_teams": "Nie możesz zmieniać drużyny podczas rundy.",
   "retakes.enabled": "{red}wyłączone{default}",
   "retakes.disabled": "{green}włączone{default}",
 
