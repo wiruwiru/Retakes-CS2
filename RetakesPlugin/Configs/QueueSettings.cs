@@ -4,6 +4,9 @@ namespace RetakesPlugin.Configs;
 
 public class QueueSettings
 {
+    [JsonPropertyName("AutoAddToQueue")]
+    public AutoAddToQueue AutoAddToQueue { get; set; } = new();
+
     [JsonPropertyName("QueuePriorityFlag")]
     public List<QueuePriorityFlagConfig>? QueuePriorityFlag { get; set; } = new()
     {
@@ -38,4 +41,20 @@ public class QueueSettings
 
         return QueueImmunityFlag;
     }
+}
+
+public class AutoAddToQueue
+{
+    [JsonPropertyName("ShouldAutoAddToQueue")]
+    public bool ShouldAutoAddToQueue { get; set; } = false;
+
+    [JsonPropertyName("EnableAutoAddBypass")]
+    public bool EnableAutoAddBypass { get; set; } = false;
+
+    [JsonPropertyName("AutoAddToQueueBypassFlag")]
+    public List<string> AutoAddToQueueBypassFlag { get; set; } = new()
+    {
+        "@css/root",
+        "@css/generic"
+    };
 }

@@ -67,6 +67,9 @@ When the plugin is first loaded it will create a `retakes_config.json` file in t
 ### QueueSettings
 | Config                 | Description                                                                                                   | Default  | Min | Max |
 |------------------------|---------------------------------------------------------------------------------------------------------------|----------|-----|-----|
+| ShouldAutoAddToQueue            | Whether to automatically add new players to the queue when they connect. If disabled, players will need to manually join the game. | true    | false | true  |
+| EnableAutoAddBypass       | Whether to enable the bypass system. When enabled, players with specific flags won't be automatically added to the queue. | true    | false | true  |
+| AutoAddToQueueBypassFlag  | A list of permission flags that bypass automatic queue addition. Players with these flags won't be added to the queue automatically. | `["@css/root", "@css/admin"]` | - | - |
 | QueuePriorityFlag      | A list of priority flag configurations. Each entry contains DisplayName, Flag, and Priority. Players with higher priority can replace players with lower priority in the queue. | `[{"DisplayName": "VIP", "Flag": "@css/vip", "Priority": 0}]` | 0 | 100 |
 | QueueImmunityFlag      | A list of immunity flag configurations. Each entry contains DisplayName, Flag, and Priority. Players with immunity priority cannot be replaced by players with equal or lower priority. | `[{"DisplayName": "VIP", "Flag": "@css/vip", "Priority": 0}]` | 0 | 100 |
 | ShouldRemoveSpectators | When a player is moved to spectators, remove them from all retake queues. Ensures that AFK plugins work as expected. | true     | false | true |
