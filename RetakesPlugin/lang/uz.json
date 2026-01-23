@@ -1,7 +1,6 @@
 {
   "retakes.prefix": "[{green}RETAKES{default}]",
   "retakes.no_permissions": "Sizda bu buyruqdan foydalanish huquqi yo'q.",
-  "retakes.cannot_switch_teams": "O‘yin davrida jamoani o‘zgartirish mumkin emas.",
   "retakes.enabled": "{red}o'chirilgan{default}",
   "retakes.disabled": "{green}yoqilgan{default}",
   
@@ -11,6 +10,7 @@
   "retakes.queue.vip_took_place": "Siz {green}{0}{default}ning o'rniga o'yinga kirdingiz, chunki siz {gold}{1}{default} siz.",
 
   "retakes.bombsite.announcement": "Retake {green}{0}{default}: {lightred}{1} Tlar{default} va [BLUE]{2} KTlar",
+  "retakes.center.bombsite.announcement": "Retake {green}{0}{default}: {lightred}{1} Tlar{default} va [BLUE]{2} KTlar",
   "retakes.voices.toggle": "Siz ovozli e‘lonlarni {0}!",
   
   "retakes.teams.scramble": "Terrorchilar ketma-ket {green}{0}{default} raundda g‘alaba qozonishdi. {purple}Jamoalar aralashtirildi!",
