@@ -22,7 +22,7 @@ using RetakesPlugin.Commands.SpawnEditor;
 
 namespace RetakesPlugin;
 
-[MinimumApiVersion(345)]
+[MinimumApiVersion(369)]
 public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
 {
     public const string Version = "3.1.0";
