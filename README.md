@@ -56,19 +56,22 @@ If you'd like to add your own allocator here, make a PR to add it :+1:
 When the plugin is first loaded it will create a `retakes_config.json` file in the plugin directory. This file contains all of the configuration options for the plugin:
 
 ### GameSettings
-| Config                    | Description                                                                                                                             | Default | Min   | Max   |
-|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------|-------|-------|
-| MaxPlayers                | The maximum number of players allowed in the game at any time. (If you want to increase the max capability you need to add more spawns) | 9       | 2     | 10    |
-| ShouldBreakBreakables     | Whether to break all breakable props on round start (People are noticing rare crashes when this is enabled).                            | false   | false | true  |
-| ShouldOpenDoors           | Whether to open doors on round start (People are noticing rare crashes when this is enabled).                                           | false   | false | true  |
-| EnableFallbackAllocation  | Whether to enable the fallback weapon allocation. You should set this value to false if you're using a standalone weapon allocator.     | true    | false | true  |
+| Config                   | Description                                                                                                                                                                       | Default | Min   | Max  |
+|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|-------|------|
+| MaxPlayers               | The maximum number of players allowed in the game at any time. (If you want to increase the max capability you need to add more spawns)                                           | 9       | 2     | 10   |
+| MinimumPlayers           | The minimum number of human players needed before a retake will start. Below this the server waits in warmup. 0 (default) disables this behaviour; set it to e.g. 2 to enable it. Values above MaxPlayers are clamped. | 0       | 0     | MaxPlayers |
+| ShouldBreakBreakables    | Whether to break all breakable props on round start (People are noticing rare crashes when this is enabled).                                                                      | false   | false | true |
+| ShouldOpenDoors          | Whether to open doors on round start (People are noticing rare crashes when this is enabled).                                                                                     | false   | false | true |
+| EnableFallbackAllocation | Whether to enable the fallback weapon allocation. You should set this value to false if you're using a standalone weapon allocator.                                               | true    | false | true |
 
 ### QueueSettings
-| Config                 | Description                                                                                                   | Default  | Min | Max |
-|------------------------|---------------------------------------------------------------------------------------------------------------|----------|-----|-----|
-| QueuePriorityFlag      | A list of priority flag configurations. Each entry contains DisplayName, Flag, and Priority. Players with higher priority can replace players with lower priority in the queue. | `[{"DisplayName": "VIP", "Flag": "@css/vip", "Priority": 0}]` | 0 | 100 |
-| QueueImmunityFlag      | A list of immunity flag configurations. Each entry contains DisplayName, Flag, and Priority. Players with immunity priority cannot be replaced by players with equal or lower priority. | `[{"DisplayName": "VIP", "Flag": "@css/vip", "Priority": 0}]` | 0 | 100 |
-| ShouldRemoveSpectators | When a player is moved to spectators, remove them from all retake queues. Ensures that AFK plugins work as expected. | true     | false | true |
+| Config                   | Description                                                                                                                                                                                 | Default                                                       | Min   | Max  |
+|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|-------|------|
+| QueuePriorityFlag        | A list of priority flag configurations. Each entry contains DisplayName, Flag, and Priority. Players with higher priority can replace players with lower priority in the queue.             | `[{"DisplayName": "VIP", "Flag": "@css/vip", "Priority": 0}]` | 0     | 100  |
+| QueueImmunityFlag        | A list of immunity flag configurations. Each entry contains DisplayName, Flag, and Priority. Players with immunity priority cannot be replaced by players with equal or lower priority.     | `[{"DisplayName": "VIP", "Flag": "@css/vip", "Priority": 0}]` | 0     | 100  |
+| ShouldRemoveSpectators   | When a player is moved to spectators, remove them from all retake queues. Ensures that AFK plugins work as expected.                                                                        | true                                                          | false | true |
+| ShouldAutoJoinSpectators | Whether to move newly connected players to spectators and open the team menu for them.                                                                                                      | true                                                          | false | true |
+| ShouldAutoJoinGame       | Whether to automatically put newly connected players into the game without showing the team menu: straight in during warmup, otherwise into the queue to be pulled in at the next round. Takes priority over ShouldAutoJoinSpectators. | false                                                         | false | true |
 
 **QueuePriorityFlag and QueueImmunityFlag Configuration:**
 Each flag configuration object has the following properties:
@@ -122,16 +125,27 @@ To disable slot priority and immunity features, set both arrays to empty:
 | EnableBombsiteAnnouncementVoices   | Whether to play the bombsite announcement voices.                                               | false   | false | true |
 | EnableBombsiteAnnouncementCenter   | Whether to display the bombsite in the center announcement box.                                 | true    | false | true |
 | EnableFallbackBombsiteAnnouncement | Whether to enable the fallback bombsite announcement.                                           | true    | false | true |
+| EnablePlantLocationAnnouncement    | Whether to tell the Terrorists where the bomb was planted (e.g. "planted for Short"). Uses the optional `PlantLocation` name on the planter spawn in the map config, falling back to the bombsite letter. | false   | false | true |
 
 ### BombSettings
-| Config             | Description                                                         | Default | Min   | Max  |
-|--------------------|---------------------------------------------------------------------|---------|-------|------|
+| Config             | Description                                                            | Default | Min   | Max  |
+|--------------------|------------------------------------------------------------------------|---------|-------|------|
 | IsAutoPlantEnabled | Whether to enable auto bomb planting at the start of the round or not. | true    | false | true |
 
 ### DebugSettings
-| Config      | Description                                                 | Default | Min   | Max  |
-|-------------|-------------------------------------------------------------|---------|-------|------|
+| Config      | Description                                                  | Default | Min   | Max  |
+|-------------|--------------------------------------------------------------|---------|-------|------|
 | IsDebugMode | Whether to enable debug output to the server console or not. | false   | false | true |
+
+### ConVars
+| ConVar          | Description                                                                                                                                                                                                                                     | Default |
+|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| retakes_enabled | Enable / disable the retakes gameplay on the fly without unloading the plugin. When set to 0 the plugin stops managing teams, spawns and rounds so you can e.g. practice grenades. Setting it back to 1 restores retakes and restarts the game. | 1       |
+
+### Server config files
+When the plugin first loads it creates two config files in `cfg/cs2-retakes/`:
+- `retakes.cfg` is executed on every map start and contains the convars required for retakes to work, plus some you may want to tweak.
+- `retakes_unload.cfg` is executed when the plugin is unloaded, and restores the convars that `retakes.cfg` changes back to sensible defaults. Adjust it to suit your server.
 
 ## Commands
 
@@ -151,10 +165,10 @@ To disable slot priority and immunity features, set both arrays to empty:
 | !showspawns        | <A / B>                           | Show the spawns for the specified bombsite.                          | @css/root   |
 | !spawns            | <A / B>                           | Show the spawns for the specified bombsite (alias).                  | @css/root   |
 | !edit              | <A / B>                           | Show the spawns for the specified bombsite (alias).                  | @css/root   |
-| !addspawn          | <CT / T> <Y / N (can be planter)> | Adds a retakes spawn point for the bombsite spawns currently shown.  | @css/root   |
-| !add               | <CT / T> <Y / N (can be planter)> | Adds a retakes spawn point (alias).                                  | @css/root   |
-| !newspawn          | <CT / T> <Y / N (can be planter)> | Adds a retakes spawn point (alias).                                  | @css/root   |
-| !new               | <CT / T> <Y / N (can be planter)> | Adds a retakes spawn point (alias).                                  | @css/root   |
+| !addspawn          | <CT / T> <Y / N (can be planter)> [plant location name] | Adds a retakes spawn point for the bombsite spawns currently shown. The optional plant location name (e.g. "Short") is stored on planter spawns and used by EnablePlantLocationAnnouncement. | @css/root   |
+| !add               | <CT / T> <Y / N (can be planter)> [plant location name] | Adds a retakes spawn point (alias).                                  | @css/root   |
+| !newspawn          | <CT / T> <Y / N (can be planter)> [plant location name] | Adds a retakes spawn point (alias).                                  | @css/root   |
+| !new               | <CT / T> <Y / N (can be planter)> [plant location name] | Adds a retakes spawn point (alias).                                  | @css/root   |
 | !removespawn       |                                   | Removes the nearest spawn point for the bombsite currently shown.    | @css/root   |
 | !remove            |                                   | Removes the nearest spawn point (alias).                             | @css/root   |
 | !deletespawn       |                                   | Removes the nearest spawn point (alias).                             | @css/root   |
@@ -166,14 +180,14 @@ To disable slot priority and immunity features, set both arrays to empty:
 | !exitedit          |                                   | Exits the spawn editing mode (alias).                                | @css/root   |
 
 ### Map Config Commands
-| Command            | Arguments          | Description                                    | Permissions |
-|--------------------|--------------------|------------------------------------------------|-------------|
-| !mapconfig         | <Config file name> | Forces a specific map config file to load.     | @css/root   |
-| !setmapconfig      | <Config file name> | Forces a specific map config file to load (alias). | @css/root   |
-| !loadmapconfig     | <Config file name> | Forces a specific map config file to load (alias). | @css/root   |
-| !mapconfigs        |                    | Displays a list of available map configs.     | @css/root   |
-| !viewmapconfigs    |                    | Displays a list of available map configs (alias). | @css/root   |
-| !listmapconfigs    |                    | Displays a list of available map configs (alias). | @css/root   |
+| Command         | Arguments          | Description                                        | Permissions |
+|-----------------|--------------------|----------------------------------------------------|-------------|
+| !mapconfig      | <Config file name> | Forces a specific map config file to load.         | @css/root   |
+| !setmapconfig   | <Config file name> | Forces a specific map config file to load (alias). | @css/root   |
+| !loadmapconfig  | <Config file name> | Forces a specific map config file to load (alias). | @css/root   |
+| !mapconfigs     |                    | Displays a list of available map configs.          | @css/root   |
+| !viewmapconfigs |                    | Displays a list of available map configs (alias).  | @css/root   |
+| !listmapconfigs |                    | Displays a list of available map configs (alias).  | @css/root   |
 
 ## Stay up to date
 Subscribe to **release** notifications and stay up to date with the latest features and patches:

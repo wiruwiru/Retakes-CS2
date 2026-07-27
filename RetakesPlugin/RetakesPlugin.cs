@@ -3,6 +3,7 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Core.Capabilities;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Cvars;
 using RetakesPluginShared;
 using System.Text.Json;
 
@@ -24,7 +25,7 @@ namespace RetakesPlugin;
 [MinimumApiVersion(345)]
 public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
 {
-    public const string Version = "3.0.4";
+    public const string Version = "3.1.0";
 
     #region Plugin Info
     public override string ModuleName => "Retakes Plugin";
@@ -90,6 +91,13 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
     private readonly HashSet<CCSPlayerController> _hasMutedVoices = [];
     #endregion
 
+    #region ConVars
+    public FakeConVar<bool> RetakesEnabledConVar = new("retakes_enabled", "Whether the retakes plugin is enabled or not.", true);
+    private bool _lastEnabledState = true;
+    #endregion
+
+    public bool IsPluginEnabled => RetakesEnabledConVar.Value;
+
     public RetakesPlugin()
     {
         _jsonOptions = new JsonSerializerOptions
@@ -109,6 +117,8 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
 
         RegisterListener<Listeners.OnMapStart>(OnMapStart);
         AddCommandListener("jointeam", OnCommandJoinTeam);
+
+        RetakesEnabledConVar.ValueChanged += OnRetakesEnabledChanged;
 
         var retakesPluginEventSender = new RetakesPluginEventSender();
         Capabilities.RegisterPluginCapability(RetakesPluginEventSenderCapability, () => retakesPluginEventSender);
@@ -143,15 +153,55 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
 
         SpawnService.Reset();
 
-        AddTimer(1.0f, ServerHelper.ExecuteRetakesConfiguration);
+        AddTimer(1.0f, () =>
+        {
+            if (IsPluginEnabled)
+            {
+                ServerHelper.ExecuteRetakesConfiguration();
+            }
+        });
 
         InitializeServices(mapName);
+    }
+
+    private void OnRetakesEnabledChanged(object? sender, bool isEnabled)
+    {
+        if (isEnabled == _lastEnabledState)
+        {
+            return;
+        }
+
+        _lastEnabledState = isEnabled;
+
+        if (isEnabled)
+        {
+            Utils.Logger.LogInfo("Main", "Retakes enabled via retakes_enabled convar");
+            Server.PrintToChatAll($"{Localizer["retakes.prefix"]} {Localizer["retakes.plugin.enabled"]}");
+
+            ServerHelper.ExecuteRetakesConfiguration();
+            _gameManager?.QueueManager.SyncActivePlayersFromTeams();
+            GameRulesHelper.RestartGame();
+        }
+        else
+        {
+            Utils.Logger.LogInfo("Main", "Retakes disabled via retakes_enabled convar");
+            Server.PrintToChatAll($"{Localizer["retakes.prefix"]} {Localizer["retakes.plugin.disabled"]}");
+
+            // Make sure we don't leave the server stuck in a paused warmup
+            _gameManager?.CancelWaitingForPlayers();
+            Server.ExecuteCommand("mp_warmup_pausetimer 0");
+            ServerHelper.ExecuteRetakesUnloadConfiguration();
+            _gameManager?.QueueManager.ClearAllQueues();
+        }
     }
 
     private void InitializeServices(string mapName, string? customMapConfig = null)
     {
         try
         {
+            // A previous game manager may be holding the server in a paused warmup
+            _gameManager?.CancelWaitingForPlayers();
+
             // Initialize MapConfigService
             _mapConfigService = new MapConfigService(ModuleDirectory, customMapConfig ?? mapName, _jsonOptions);
             _mapConfigService.Load();
@@ -174,7 +224,8 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
                 Config.Team.RoundsToScramble,
                 Config.Team.IsScrambleEnabled,
                 Config.Queue.ShouldRemoveSpectators,
-                Config.Team.IsBalanceEnabled
+                Config.Team.IsBalanceEnabled,
+                Config.Game.MinimumPlayers
             );
 
             _breakerManager = new BreakerManager(
@@ -187,7 +238,8 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
                 _random,
                 _hasMutedVoices,
                 Config.MapConfig.EnableBombsiteAnnouncementVoices,
-                Config.MapConfig.EnableBombsiteAnnouncementCenter
+                Config.MapConfig.EnableBombsiteAnnouncementCenter,
+                Config.MapConfig.EnablePlantLocationAnnouncement
             );
 
             // Initialize Event Handlers
@@ -291,61 +343,117 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
     #region Event Handlers
     private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         return _playerEventHandlers?.OnPlayerConnectFull(@event, info) ?? HookResult.Continue;
     }
 
     private HookResult OnRoundPreStart(EventRoundPrestart @event, GameEventInfo info)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         return _roundEventHandlers?.OnRoundPreStart(@event, info) ?? HookResult.Continue;
     }
 
     private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         return _roundEventHandlers?.OnRoundStart(@event, info) ?? HookResult.Continue;
     }
 
     private HookResult OnRoundPostStart(EventRoundPoststart @event, GameEventInfo info)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         return _roundEventHandlers?.OnRoundPostStart(@event, info) ?? HookResult.Continue;
     }
 
     private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         return _roundEventHandlers?.OnRoundFreezeEnd(@event, info) ?? HookResult.Continue;
     }
 
     private HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         return _roundEventHandlers?.OnRoundEnd(@event, info) ?? HookResult.Continue;
     }
 
     private HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         return _playerEventHandlers?.OnPlayerSpawn(@event, info) ?? HookResult.Continue;
     }
 
     private HookResult OnPlayerDeath(EventPlayerDeath @event, GameEventInfo info)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         return _playerEventHandlers?.OnPlayerDeath(@event, info) ?? HookResult.Continue;
     }
 
     private HookResult OnBombPlanted(EventBombPlanted @event, GameEventInfo info)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         return _roundEventHandlers?.OnBombPlanted(@event, info) ?? HookResult.Continue;
     }
 
     private HookResult OnBombDefused(EventBombDefused @event, GameEventInfo info)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         return _roundEventHandlers?.OnBombDefused(@event, info) ?? HookResult.Continue;
     }
 
     private HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
     {
+        // Always run so we never leave stale players in the queues
         return _playerEventHandlers?.OnPlayerDisconnect(@event, info) ?? HookResult.Continue;
     }
 
     private HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         return _playerEventHandlers?.OnPlayerTeam(@event, info) ?? HookResult.Continue;
     }
     #endregion
@@ -353,6 +461,11 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
     #region Command Handlers
     private HookResult OnCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
     {
+        if (!IsPluginEnabled)
+        {
+            return HookResult.Continue;
+        }
+
         if (_gameManager == null)
         {
             Utils.Logger.LogWarning("Commands", "Game manager not loaded");
@@ -372,13 +485,8 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
         var response = _gameManager.QueueManager.PlayerJoinedTeam(player, fromTeam, toTeam);
         _gameManager.QueueManager.DebugQueues(false);
 
-        if (_gameManager.QueueManager.ActivePlayers.Count == 0)
-        {
-            Utils.Logger.LogDebug("Commands", "No active players, updating queue and restarting game");
-            _gameManager.QueueManager.ClearRoundTeams();
-            _gameManager.QueueManager.Update();
-            GameRulesHelper.RestartGame();
-        }
+        _gameManager.CheckMinimumPlayers();
+        _gameManager.RestartGameIfEmpty();
 
         return response;
     }
@@ -387,6 +495,12 @@ public class RetakesPlugin : BasePlugin, IPluginConfig<BaseConfigs>
     public override void Unload(bool hotReload)
     {
         Utils.Logger.LogInfo("Main", "Plugin unloading...");
+
+        if (!hotReload)
+        {
+            ServerHelper.ExecuteRetakesUnloadConfiguration();
+        }
+
         base.Unload(hotReload);
     }
 }
