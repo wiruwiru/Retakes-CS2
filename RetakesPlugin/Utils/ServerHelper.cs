@@ -21,6 +21,13 @@ public static class ServerHelper
             MigrateRetakesConfig();
         }
 
+        // Create the unload config eagerly so server owners can customise it
+        // before the plugin is ever unloaded
+        if (!File.Exists(RetakesUnloadCfgPath))
+        {
+            CreateRetakesUnloadConfig();
+        }
+
         Server.ExecuteCommand("exec cs2-retakes/retakes.cfg");
         Logger.LogInfo("Server", "Retakes configuration executed");
     }
@@ -36,8 +43,8 @@ public static class ServerHelper
             // default is migrated, custom values are left alone.
             var migrated = Regex.Replace(
                 contents,
-                @"(?m)^(\s*)mp_roundtime_defuse\s+0\.25\s*$",
-                "${1}mp_roundtime_defuse 1.25");
+                @"(?m)^([ \t]*)mp_roundtime_defuse[ \t]+0\.25[ \t]*(\r?)$",
+                "${1}mp_roundtime_defuse 1.25${2}");
 
             if (migrated != contents)
             {

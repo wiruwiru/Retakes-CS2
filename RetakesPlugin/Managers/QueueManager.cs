@@ -39,7 +39,14 @@ public class QueueManager
 
     public int GetHumanActivePlayerCount()
     {
-        return ActivePlayers.Count(player => PlayerHelper.IsValid(player) && !player.IsBot && !player.IsHLTV);
+        // Queued humans count too, otherwise bots occupying active slots could
+        // stop a MinimumPlayers hold from ever releasing
+        return ActivePlayers.Count(IsHumanPlayer) + QueuePlayers.Count(IsHumanPlayer);
+    }
+
+    private static bool IsHumanPlayer(CCSPlayerController player)
+    {
+        return PlayerHelper.IsValid(player) && !player.IsBot && !player.IsHLTV;
     }
 
     public int GetTargetNumTerrorists()
@@ -111,8 +118,9 @@ public class QueueManager
 
         if (!QueuePlayers.Contains(player))
         {
-            // Players explicitly choosing to spectate should not be tracked as wanting to play
-            if (toTeam != CsTeam.Terrorist && toTeam != CsTeam.CounterTerrorist)
+            // Players explicitly choosing to spectate should not be tracked as wanting
+            // to play. CsTeam.None (the auto-select button) still falls through below.
+            if (toTeam == CsTeam.Spectator)
             {
                 return HookResult.Continue;
             }

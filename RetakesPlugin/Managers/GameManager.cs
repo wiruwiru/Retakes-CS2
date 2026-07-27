@@ -103,9 +103,9 @@ public class GameManager
     {
         var humanCount = QueueManager.GetHumanActivePlayerCount();
 
-        // Rate limit so jointeam spam can't flood the chat
+        // Rate limit purely on time so join/leave flapping can't flood the chat either
         var timeSinceLastAnnounce = Server.CurrentTime - _lastWaitingAnnounceTime;
-        if (humanCount == _lastAnnouncedWaitingCount && timeSinceLastAnnounce >= 0 && timeSinceLastAnnounce < WaitingAnnounceCooldownSeconds)
+        if (timeSinceLastAnnounce >= 0 && timeSinceLastAnnounce < WaitingAnnounceCooldownSeconds)
         {
             return;
         }
