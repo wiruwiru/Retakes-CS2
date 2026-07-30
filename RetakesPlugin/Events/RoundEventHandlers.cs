@@ -78,6 +78,16 @@ public class RoundEventHandlers
         _gameManager.QueueManager.Update();
         _gameManager.QueueManager.DebugQueues(false);
 
+        if (_gameManager.ShouldWaitForPlayers())
+        {
+            Logger.LogInfo("Round", "Not enough players to start a retake, waiting for players");
+            _gameManager.StartWaitingForPlayers();
+            return HookResult.Continue;
+        }
+
+        // Heal any stale waiting state, e.g. if an admin manually ran mp_warmup_end
+        _gameManager.CancelWaitingForPlayers();
+
         _gameManager.OnRoundPreStart(_lastRoundWinner);
         _gameManager.QueueManager.SetRoundTeams();
 
@@ -120,6 +130,12 @@ public class RoundEventHandlers
             return HookResult.Continue;
         }
 
+        if (_gameManager.IsWaitingForPlayers)
+        {
+            Logger.LogDebug("Round", "Waiting for players, skipping round start logic");
+            return HookResult.Continue;
+        }
+
         if (_spawnManager == null)
         {
             Logger.LogDebug("Round", "Spawn manager not loaded.");
@@ -155,6 +171,12 @@ public class RoundEventHandlers
         if (gameRules.WarmupPeriod)
         {
             Logger.LogDebug("Round", "Warmup round, skipping post-start logic");
+            return HookResult.Continue;
+        }
+
+        if (_gameManager.IsWaitingForPlayers)
+        {
+            Logger.LogDebug("Round", "Waiting for players, skipping post-start logic");
             return HookResult.Continue;
         }
 
@@ -207,6 +229,12 @@ public class RoundEventHandlers
             return HookResult.Continue;
         }
 
+        if (_gameManager.IsWaitingForPlayers)
+        {
+            Logger.LogDebug("Round", "Waiting for players, skipping freeze end logic");
+            return HookResult.Continue;
+        }
+
         if (PlayerHelper.GetPlayerCount(CsTeam.Terrorist) > 0)
         {
             HandleAutoPlant();
@@ -225,6 +253,8 @@ public class RoundEventHandlers
     public HookResult OnBombPlanted(EventBombPlanted @event, GameEventInfo info)
     {
         Logger.LogInfo("Round", "Bomb planted");
+
+        _announcementService.AnnouncePlantLocation(_spawnManager.CurrentPlanterSpawn?.PlantLocation, _currentBombsite);
 
         _plugin.AddTimer(4.1f, () =>
         {
